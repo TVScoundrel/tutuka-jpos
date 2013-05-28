@@ -1,0 +1,77 @@
+def archiveJarName="${project.name}-${project.version}.jar"
+
+// We build a CopySpec for consistency
+def jposCopySpec = copySpec {
+    def cfg = new Properties()
+    def target = project.hasProperty('target') ? target : 'devel'
+    cfg.put('jarname', archiveJarName.toString())
+    cfg.put('target', target.toString())
+    File cfgFile = file("${target}.properties")
+    if (cfgFile.exists()) {
+        cfgFile.withInputStream{
+            cfg.load(it);   
+        }
+    }
+    from(file("src/dist")) {
+        exclude 'cfg/*.jks'
+        filter(
+            org.apache.tools.ant.filters.ReplaceTokens, 
+            tokens: cfg
+        )
+    }
+    from(file("src/dist")) {
+        include 'cfg/*.jks'
+    }
+    from(jar) {
+        rename archiveJarName, "${cfg.jarname}"
+    }
+    into("lib") {
+        from(configurations.runtime)
+    }
+}
+
+// Create the jar's manifest
+jar.manifest {
+    attributes \
+        'Implementation-Title': project.name,
+        'Implementation-Version': project.version,
+        'Main-Class': 'org.jpos.q2.Q2',
+        'Class-Path': configurations.runtime.collect { "lib/" + it.getName() }.join(' ')
+}
+
+//--------------------------------------------------
+// TASKS
+//--------------------------------------------------
+
+task version (type: JavaExec, dependsOn: classes) {
+    description = "Shows jPOS Version"
+    main = 'org.jpos.q2.Q2'
+    args = ['--version']
+    classpath configurations.runtime 
+}
+
+task dist(type: Tar) {
+    description 'Creates tar distribution'
+    into "$project.name-$version"
+    with jposCopySpec
+    compression = Compression.GZIP
+    extension "tar.gz"
+}
+
+task installApp(type: Sync, dependsOn: 'installResources') {
+    description 'Installs jPOS based application'
+    into { file("${project.buildDir}/install/${project.name}") }
+    with jposCopySpec
+}
+
+task wrapper( type: Wrapper ) {
+    description = "Generate gradlew[.bat]"
+    gradleVersion = '1.5'
+}
+
+task installResources(dependsOn: 'classes', type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.jpos.q2.install.Install'
+    args = ["--outputDir=src/dist"]
+}
+
