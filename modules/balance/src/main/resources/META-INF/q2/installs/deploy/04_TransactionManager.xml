@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<txnmgr name="tm1" logger="Q2" class="org.jpos.transaction.TransactionManager" realm="tm1">
+    <property name="input-space"        value="tspace:default"/>
+    <property name="queue"              value="txn"/>    
+    <property name="sessions"           value="5"/>
+    <property name="debug"              value="false"/>
+</txnmgr>

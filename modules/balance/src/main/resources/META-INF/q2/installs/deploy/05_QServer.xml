@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <server class="org.jpos.q2.iso.QServer" logger="Q2" name="test_module">
 	<attr name="port" type="java.lang.Integer">5000</attr>
 	<channel class="org.jpos.iso.channel.XMLChannel" logger="Q2" packager="org.jpos.iso.packager.XMLPackager" />
-	<request-listener class="com.tutuka.jpos.Test" logger="Q2" />
+	<request-listener class="com.tutuka.jpos.BalanceRequestListener" logger="Q2" />
 </server>
