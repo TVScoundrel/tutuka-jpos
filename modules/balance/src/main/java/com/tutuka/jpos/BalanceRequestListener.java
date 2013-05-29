@@ -23,9 +23,6 @@ public class BalanceRequestListener implements ISORequestListener {
 		
 		Space sp = SpaceFactory.getSpace();
 		sp.out("txn", ctx);
-		/*m.setResponseMTI();
-		m.set(39, "00");
-		source.send(m);*/
 		return true;
 	}
 }
